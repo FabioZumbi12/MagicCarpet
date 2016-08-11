@@ -13,6 +13,9 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import net.digiex.magiccarpet.plugins.NoCheatPlus;
 import net.digiex.magiccarpet.plugins.Plugins;
@@ -51,7 +54,8 @@ public class Carpet {
             bl.setType(material);
         }
 
-        void set(final Block bl, final Material material, final byte data) {
+        @SuppressWarnings("deprecation")
+		void set(final Block bl, final Material material, final byte data) {
             bl.setMetadata("Carpet", new FixedMetadataValue(plugin, who.getUniqueId()));
             bl.setTypeIdAndData(material.getId(), data, false);
         }
@@ -101,7 +105,11 @@ public class Carpet {
         void update() {
             if (!block.hasMetadata("Carpet"))
                 return;
-            block.update(true);
+            new BukkitRunnable() {
+                public void run() {
+                	block.update(true);
+                }
+            }.runTask(plugin);            
             block.removeMetadata("Carpet", plugin);
         }
     }
@@ -155,6 +163,7 @@ public class Carpet {
             else
                 fibre.set(bl, thread);
         }
+        makeInvisible();
         return true;
     }
 
@@ -400,7 +409,8 @@ public class Carpet {
     }
 
     public void show() {
-        if (hidden) {
+    	
+        if (hidden) {        	
             currentCentre = who.getLocation().getBlock().getRelative(0, -1, 0);
             hidden = false;
             if (drawCarpet()) {
@@ -415,6 +425,39 @@ public class Carpet {
         }
     }
 
+    public void makeInvisible(){
+    	if (!Config.getInvisibilityBarrier()){
+    		return;
+    	}
+    	String pname = who.getName();
+    	//check vanish   
+        if (who.getActivePotionEffects().size() > 0){
+        	for (PotionEffect pot:who.getActivePotionEffects()){
+            	if (pot.getType().equals(PotionEffectType.INVISIBILITY)){
+            		if (!thread.equals(Material.BARRIER)){
+            			MagicCarpet.prevMat.put(pname, thread);
+            			thread = Material.BARRIER;   
+                		tools = false;
+                		light = false;
+                		return;
+                	}
+            	} else if (MagicCarpet.prevMat.containsKey(pname)){
+            		thread = MagicCarpet.prevMat.get(pname);
+            		MagicCarpet.prevMat.remove(pname);
+            		return;
+                }      	    	
+            }
+        } else if (MagicCarpet.prevMat.containsKey(pname)){
+        	thread = MagicCarpet.prevMat.get(pname);
+        	MagicCarpet.prevMat.remove(pname);
+        	return;
+        }
+        
+        if (thread.equals(Material.BARRIER) && !MagicCarpet.prevMat.containsKey(pname)){
+        	thread = Config.getCarpetMaterial();
+        }
+    }
+    
     public boolean touches(final Block block) {
         if (currentCentre == null || block == null)
             return false;

@@ -69,6 +69,7 @@ public final class Config {
         options.put("carpet-color", "white");
         options.put("fall", Config.fall);
         options.put("drowning", Config.drowning);
+        options.put("barrier-invisibility", Config.invibilityBarrier);
 
         if (configFile.exists())
             loadSettings();
@@ -100,6 +101,7 @@ public final class Config {
     private static Byte carpetData = 0;
     private static boolean fall = false;
     private static boolean drowning = false;
+    private static boolean invibilityBarrier = false;
 
     private static String saveString(final String s) {
         return s.toLowerCase().replace("_", " ");
@@ -337,6 +339,10 @@ public final class Config {
     public static void setDrowning(final boolean drowning) {
         Config.drowning = drowning;
     }
+    
+    public static boolean getInvisibilityBarrier(){
+    	return Config.invibilityBarrier;
+    }
 
     public static void saveSettings() {
         for (final Entry<String, Object> o : options.entrySet())
@@ -405,6 +411,7 @@ public final class Config {
         pvpHide = config.getBoolean("pvp-hide", true);
         fall = config.getBoolean("fall", false);
         drowning = config.getBoolean("drowning", false);
+        invibilityBarrier = config.getBoolean("barrier-invisibility", false);
     }
 
     public static void checkConfig() {

@@ -22,7 +22,7 @@ commands:
     usage: /<command>
   magicreload:
     description: Reloads MagicCarpet.
-    aliases: [mr]
+    aliases: [mcr]
     usage: /<command>
   magiccarpetbuy:
     description: Allows you to buy time for Magic Carpet.

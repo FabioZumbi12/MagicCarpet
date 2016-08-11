@@ -1,6 +1,9 @@
 package net.digiex.magiccarpet;
 
+import java.util.List;
+
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
@@ -43,7 +46,7 @@ import org.bukkit.util.Vector;
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 public class Listeners implements Listener {
-
+	
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerJoin(final PlayerJoinEvent event) {
         final Player player = event.getPlayer();
@@ -123,7 +126,7 @@ public class Listeners implements Listener {
                 event.setCancelled(true);
         }
     }
-
+    
     @EventHandler(ignoreCancelled = true)
     public void onBlockFade(final BlockFadeEvent event) {
         for (final Carpet carpet : MagicCarpet.getCarpets().all()) {
@@ -220,28 +223,17 @@ public class Listeners implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onBlockPistonRetract(final BlockPistonRetractEvent event) {
-        if (event.isSticky()) {
-            final Block block = event.getRetractLocation().getBlock();
-            if (block.hasMetadata("Carpet"))
-                event.setCancelled(true);
-            else {
-                final int radius = 2;
-                final int a = block.getX();
-                final int b = block.getY();
-                final int c = block.getZ();
-                for (int x = a - radius; x <= a + radius; x++)
-                    for (int y = b - radius; y <= b + radius; y++)
-                        for (int z = c - radius; z <= c + radius; z++) {
-                            final Block near = block.getWorld().getBlockAt(x, y, z);
-                            if (near.hasMetadata("Carpet")) {
-                                event.setCancelled(true);
-                                return;
-                            }
-                        }
-            }
-        }
-    }
+	public void onPistonRetract(BlockPistonRetractEvent e){	
+    	List<Block> blocks = e.getBlocks();
+		for (Block block:blocks){
+			for (Carpet carpet:MagicCarpet.getCarpets().all()){
+				if (carpet != null && carpet.isVisible() && carpet.touches(e.getBlock())){
+					block.setType(Material.AIR);
+					e.setCancelled(true);
+				}
+			}
+		}		
+	}
 
     @EventHandler(ignoreCancelled = true)
     public void onEntityDamage(final EntityDamageEvent event) {
